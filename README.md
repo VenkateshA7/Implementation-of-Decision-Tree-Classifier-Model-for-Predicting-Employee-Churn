@@ -22,42 +22,76 @@ Developed by: Venkatesh A
 RegisterNumber: 212225040485 
 */
 import pandas as pd
-from sklearn.tree import DecisionTreeClassifier, plot_tree
-data=pd.read_csv("Employee_EX6.csv")
-data.head()
-data.info()
-data.isnull().sum()
-data["left"].value_counts()
-from sklearn.preprocessing import LabelEncoder
-le=LabelEncoder()
-data["salary"]=le.fit_transform(data["salary"])
-data.head()
-x=data[["satisfaction_level","last_evaluation","number_project","average_montly_hours","time_spend_company","Work_accident","promotion_last_5years","salary"]]
-x.head()
-y=data["left"]
 from sklearn.model_selection import train_test_split
-x_train,x_test,y_train,y_test=train_test_split(x,y,test_size=0.2,random_state=100)
 from sklearn.tree import DecisionTreeClassifier
-dt=DecisionTreeClassifier(criterion="entropy")
-dt.fit(x_train,y_train)
-y_pred=dt.predict(x_test)
-from sklearn import metrics
-accuracy=metrics.accuracy_score(y_test,y_pred)
-accuracy
-dt.predict([[0.5,0.8,9,260,6,0,1,2]])
-plt.figure(figsize=(18,6))
-plot_tree(dt,feature_names=x.columns,class_names=['salary','left'],filled=True)
+from sklearn.metrics import confusion_matrix, accuracy_score, classification_report
+from sklearn import tree
+import matplotlib.pyplot as plt
+
+# ------------------------------
+# Step 1: Sample dataset
+# ------------------------------
+data = {
+    'satisfaction_level': [0.38, 0.80, 0.11, 0.72, 0.37, 0.41, 0.10, 0.92],
+    'last_evaluation': [0.53, 0.86, 0.88, 0.87, 0.52, 0.50, 0.77, 0.89],
+    'number_project': [2, 5, 7, 5, 2, 2, 6, 5],
+    'average_monthly_hours': [157, 262, 272, 223, 159, 153, 247, 224],
+    'time_spend_company': [3, 6, 4, 5, 3, 3, 4, 5],
+    'Work_accident': [0, 0, 0, 0, 0, 0, 0, 0],
+    'promotion_last_5years': [0, 0, 0, 0, 0, 0, 0, 0],
+    'Departments': ['sales','accounting','hr','technical','support','management','marketing','product'],
+    'salary': ['low','medium','medium','high','low','low','medium','high'],
+    'left': [1, 1, 1, 1, 1, 0, 1, 0]  # Target variable: 1=Churn, 0=Stayed
+}
+
+df = pd.DataFrame(data)
+
+# ------------------------------
+# Step 2: Encode categorical variables
+# ------------------------------
+df = pd.get_dummies(df, columns=['Departments','salary'], drop_first=True)
+
+# ------------------------------
+# Step 3: Split into features and target
+# ------------------------------
+X = df.drop('left', axis=1)
+y = df['left']
+
+# ------------------------------
+# Step 4: Train-test split
+# ------------------------------
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42)
+
+# ------------------------------
+# Step 5: Create Decision Tree Classifier
+# ------------------------------
+dt_model = DecisionTreeClassifier(criterion='entropy', max_depth=4, random_state=42)
+dt_model.fit(X_train, y_train)
+
+# ------------------------------
+# Step 6: Make predictions
+# ------------------------------
+y_pred = dt_model.predict(X_test)
+
+# ------------------------------
+# Step 7: Evaluate the model
+# ------------------------------
+print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred))
+print("\nAccuracy Score:", accuracy_score(y_test, y_pred))
+print("\nClassification Report:\n", classification_report(y_test, y_pred))
+
+# ------------------------------
+# Step 8: Visualize the decision tree
+# ------------------------------
+plt.figure(figsize=(20,10))
+tree.plot_tree(dt_model, feature_names=X.columns, class_names=['Stayed','Churn'], filled=True)
 plt.show()
 
 ```
 
 ## Output:
 ![decision tree classifier model](sam.png)
-<img width="1063" height="588" alt="image" src="https://github.com/user-attachments/assets/bb7e328b-d2df-4b6d-9fd9-03114d5e896b" />
-<img width="1040" height="557" alt="image" src="https://github.com/user-attachments/assets/53c9326e-64ab-4cfe-8370-eee889e81a87" />
-<img width="1057" height="438" alt="image" src="https://github.com/user-attachments/assets/8e84d67a-d7d8-49d5-bd71-ccbd7bd4b93f" />
-<img width="801" height="242" alt="image" src="https://github.com/user-attachments/assets/8ee39d8b-a8fa-470e-9137-b93d310dd465" />
-<img width="1056" height="503" alt="image" src="https://github.com/user-attachments/assets/ae28b17d-e00c-4d67-aa40-83fb5aeddc2e" />
+<img width="572" height="371" alt="image" src="https://github.com/user-attachments/assets/bb71fcf6-0492-424a-975f-afeb2c9fe1ae" />
 
 
 
